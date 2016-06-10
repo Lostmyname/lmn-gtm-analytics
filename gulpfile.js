@@ -6,7 +6,7 @@ const path = require('path');
 const isparta = require('isparta');
 const webpack = require('webpack');
 const webpackStream = require('webpack-stream');
-const source = require('vinyl-source-stream');
+// const source = require('vinyl-source-stream');
 
 const Instrumenter = isparta.Instrumenter;
 const mochaGlobals = require('./test/setup/.globals');
@@ -80,11 +80,13 @@ function build() {
 }
 
 function _mocha() {
-  return gulp.src(['test/setup/node.js', 'test/unit/**/*.js'], {read: false})
+  return gulp.src(['test/setup/node.js', 'test/unit/**/*.js'], {
+    read: false
+  })
     .pipe($.mocha({
       reporter: 'dot',
       globals: Object.keys(mochaGlobals.globals),
-      ignoreLeaks: false
+      ignoreLeaks: true
     }));
 }
 
@@ -151,10 +153,14 @@ function testBrowser() {
         new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })
       ],
       devtool: 'inline-source-map'
-    }, null, function() {
+    }, null, function () {
       if (firstBuild) {
-        $.livereload.listen({port: 35729, host: 'localhost', start: true});
-        var watcher = gulp.watch(watchFiles, ['lint']);
+        $.livereload.listen({
+          port: 35729,
+          host: 'localhost',
+          start: true
+        });
+        // var watcher = gulp.watch(watchFiles, ['lint']);
       } else {
         $.livereload.reload('./tmp/__spec-build.js');
       }
