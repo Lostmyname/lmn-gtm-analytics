@@ -2,15 +2,14 @@
   "name": "lmn-gtm-analytics",
   "version": "0.0.2",
   "description": "GTM/Segment Integration for Lost My Name",
-  "main": "dist/lmn-gtm-analytics.js",
+  "main": "src/lmn-gtm-analytics.js",
   "scripts": {
     "test": "gulp",
     "lint": "gulp lint",
     "test-browser": "gulp test-browser",
     "watch": "gulp watch",
     "build": "gulp build",
-    "coverage": "gulp coverage",
-    "postinstall": "gulp build"
+    "coverage": "gulp coverage"
   },
   "repository": {
     "type": "git",
