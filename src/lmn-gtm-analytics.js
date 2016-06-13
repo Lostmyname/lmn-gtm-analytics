@@ -31,6 +31,9 @@ const analytics = {
         if (!properties) {
           properties = {};
         }
+        if (!properties.category) {
+          properties.category = 'All';
+        }
         if (typeof ga === 'function') {
           ga('send', 'event', properties.category, action, properties.label, properties.value);
         }

@@ -54,7 +54,7 @@ describe('analytics', () => {
         analytics.track('Custom Event-3')
           .then(() => {
             expect(global.ga)
-              .to.have.been.calledWith('send', 'event', undefined, 'Custom Event-3', undefined, undefined);
+              .to.have.been.calledWith('send', 'event', 'All', 'Custom Event-3', undefined, undefined);
           });
       });
     });
@@ -103,6 +103,9 @@ describe('analytics', () => {
 
           expect(analytics.track)
             .to.have.been.calledOnce;
+
+          expect(analytics.track)
+            .to.have.been.calledWith('send', 'event', 'All', 'Viewed Creation Canvas Page', undefined, undefined);
         });
     });
 
