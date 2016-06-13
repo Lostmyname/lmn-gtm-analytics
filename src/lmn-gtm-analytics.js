@@ -16,7 +16,7 @@ function ensureGA(timeout) {
  * Analytics wrapper for the Segment to GTM integration
  */
 const analytics = {
-  track: (action, properties, options, callback) => {
+  track: function (action, properties, options, callback) {
     return ensureGA()
       .then(() => {
         if (typeof options === 'function') {
@@ -39,7 +39,7 @@ const analytics = {
         }
       });
   },
-  page: (category, name, properties, options, callback) => {
+  page: function (category, name, properties, options, callback) {
     return ensureGA()
       .then(() => {
         if (typeof options === 'function') {
@@ -78,7 +78,7 @@ const analytics = {
       });
 
   },
-  getDimensionFromName: (name) => {
+  getDimensionFromName: function (name) {
     // Get Gianluca to look at this - can GTM do it better?
     const dimensions = {
       'Experiment: Exp 4972080620': 'dimension4',
@@ -97,7 +97,7 @@ const analytics = {
     };
     return dimensions[name];
   },
-  identify: (id, traits, options, callback) => {
+  identify: function (id, traits, options, callback) {
     return ensureGA()
       .then(() => {
         if (typeof options === 'function') {
@@ -128,7 +128,7 @@ const analytics = {
         return this;
       });
   },
-  impression: (productObject) => {
+  impression: function (productObject) {
     return ensureGA()
       .then(() => {
         if (typeof ga === 'function') {
@@ -136,7 +136,7 @@ const analytics = {
         }
       });
   },
-  ready: (callback) => {
+  ready: function (callback) {
     if (callback) {
       callback();
     }
