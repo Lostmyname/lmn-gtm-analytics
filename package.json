@@ -1,6 +1,6 @@
 {
   "name": "lmn-gtm-analytics",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "GTM/Segment Integration for Lost My Name",
   "main": "dist/lmn-gtm-analytics.js",
   "scripts": {
