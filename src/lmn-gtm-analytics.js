@@ -4,7 +4,7 @@ function ensureGA(timeout) {
   var start = Date.now();
   return new Promise(waitForGA);
   function waitForGA(resolve, reject) {
-    if (typeof ga !== 'undefined') {
+    if (typeof ga !== 'undefined' && ga.loaded) {
       return resolve();
     } else if (timeout && (Date.now() - start) >= timeout) {
       return reject(new Error('Timeout'));
@@ -138,7 +138,7 @@ const analytics = {
     return ensureGA()
       .then(() => {
         if (typeof ga === 'function') {
-          var tagName = ga.getAll()[0].get('name');
+          var tagName = ga.getAll()[1].get('name');
           ga(`${tagName}.ec:addImpression`, productObject);
         }
       });
