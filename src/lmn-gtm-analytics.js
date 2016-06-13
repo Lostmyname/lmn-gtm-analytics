@@ -35,7 +35,8 @@ const analytics = {
           properties.category = 'All';
         }
         if (typeof ga === 'function') {
-          ga('send', 'event', properties.category, action, properties.label, properties.value);
+          var tagName = ga.getAll()[0].get('name');
+          ga(`${tagName}.send`, 'event', properties.category, action, properties.label, properties.value);
         }
         if (callback) {
           callback();
@@ -70,7 +71,8 @@ const analytics = {
           category = null;
         }
         if (typeof ga === 'function' && typeof window !== 'undefined') {
-          ga('send', 'pageview', window.location.pathname);
+          var tagName = ga.getAll()[0].get('name');
+          ga(`${tagName}.send`, 'pageview', window.location.pathname);
         }
         this.track(`Viewed ${name} Page`, properties, options);
         if (callback) {
@@ -112,13 +114,15 @@ const analytics = {
           traits = null;
         }
         if (typeof ga === 'function') {
-          ga('set', 'userId', id);
+          var tagName = ga.getAll()[0].get('name');
+          ga(`${tagName}.set`, 'userId', id);
         }
         if (traits && typeof traits !== 'function') {
           Object.keys(traits).forEach((trait) => {
             if (trait.startsWith('Experiment:')) {
               if (typeof ga === 'function') {
-                ga('set', this.getDimensionFromName(trait), traits[trait]);
+                var tagName = ga.getAll()[0].get('name');
+                ga(`${tagName}.set`, this.getDimensionFromName(trait), traits[trait]);
               }
             }
           });
@@ -134,7 +138,8 @@ const analytics = {
     return ensureGA()
       .then(() => {
         if (typeof ga === 'function') {
-          ga('ec:addImpression', productObject);
+          var tagName = ga.getAll()[0].get('name');
+          ga(`${tagName}.ec:addImpression`, productObject);
         }
       });
   },
