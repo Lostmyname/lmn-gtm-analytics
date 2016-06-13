@@ -10,10 +10,10 @@ describe('analytics', () => {
       analytics.track('Custom Event', {
         category: 'test',
         label: 'test'
+      }, () => {
+        expect(global.ga)
+          .to.have.been.calledOnce;
       });
-
-      expect(global.ga)
-        .to.have.been.calledOnce;
     });
 
     describe('argument shuffling', () => {
@@ -23,10 +23,10 @@ describe('analytics', () => {
         analytics.track('Custom Event', {
           category: 'Category',
           label: 'Label'
+        }, () => {
+          expect(global.ga)
+            .to.have.been.calledWith('send', 'event', 'Category', 'Custom Event', 'Label', undefined);
         });
-
-        expect(global.ga)
-          .to.have.been.calledWith('send', 'event', 'Category', 'Custom Event', 'Label', undefined);
       });
 
       it('should pass data if no callback or options are set', () => {
@@ -39,19 +39,19 @@ describe('analytics', () => {
           integrations: {
             Optimizely: false
           }
+        }, () => {
+          expect(global.ga)
+            .to.have.been.calledWith('send', 'event', 'Category-2', 'Custom Event-2', 'Label-2', undefined);
         });
-
-        expect(global.ga)
-          .to.have.been.calledWith('send', 'event', 'Category-2', 'Custom Event-2', 'Label-2', undefined);
       });
 
       it('should pass data if no callback, options, or properties are set', () => {
         global.ga.reset();
 
-        analytics.track('Custom Event-3');
-
-        expect(global.ga)
-          .to.have.been.calledWith('send', 'event', undefined, 'Custom Event-3', undefined, undefined);
+        analytics.track('Custom Event-3', () => {
+          expect(global.ga)
+            .to.have.been.calledWith('send', 'event', undefined, 'Custom Event-3', undefined, undefined);
+        });
       });
     });
 
@@ -92,13 +92,13 @@ describe('analytics', () => {
       analytics.page('Creation Canvas', {
         locale: 'en-GB',
         orientation: 'landscape'
+      }, () => {
+        expect(global.ga)
+          .to.have.been.calledOnce;
+
+        expect(analytics.track)
+          .to.have.been.calledOnce;
       });
-
-      expect(global.ga)
-        .to.have.been.calledOnce;
-
-      expect(analytics.track)
-        .to.have.been.calledOnce;
     });
 
     describe('argument shuffling', () => {
@@ -107,37 +107,37 @@ describe('analytics', () => {
 
         analytics.page('Category', 'Homepage', {
           test: 'test'
-        }, () => {});
+        }, () => {
+          expect(global.ga)
+            .to.have.been.calledOnce;
 
-        expect(global.ga)
-          .to.have.been.calledOnce;
-
-        expect(analytics.track)
-          .to.have.been.calledWith('Viewed Homepage Page', { test: 'test' }, null);
+          expect(analytics.track)
+            .to.have.been.calledWith('Viewed Homepage Page', { test: 'test' }, null);
+        });
       });
 
       it('should still pass data if options and properties are removed', () => {
         global.ga.reset();
 
-        analytics.page('Category-2', 'Homepage-2', () => {});
+        analytics.page('Category-2', 'Homepage-2', () => {
+          expect(global.ga)
+            .to.have.been.calledOnce;
 
-        expect(global.ga)
-          .to.have.been.calledOnce;
-
-        expect(analytics.track)
-          .to.have.been.calledWith('Viewed Homepage-2 Page', null, null);
+          expect(analytics.track)
+            .to.have.been.calledWith('Viewed Homepage-2 Page', null, null);
+        });
       });
 
       it('should still pass data if options, properties and name are omitted', () => {
         global.ga.reset();
 
-        analytics.page('Homepage-3', () => {});
+        analytics.page('Homepage-3', () => {
+          expect(global.ga)
+            .to.have.been.calledOnce;
 
-        expect(global.ga)
-          .to.have.been.calledOnce;
-
-        expect(analytics.track)
-          .to.have.been.calledWith('Viewed Homepage-3 Page', null, null);
+          expect(analytics.track)
+            .to.have.been.calledWith('Viewed Homepage-3 Page', null, null);
+        });
       });
 
       it('should still pass data if category is a string and name is not a string', () => {
@@ -145,13 +145,13 @@ describe('analytics', () => {
 
         analytics.page('Homepage-4', {
           locale: 'en-GB'
+        }, () => {
+          expect(global.ga)
+            .to.have.been.calledOnce;
+
+          expect(analytics.track)
+            .to.have.been.calledWith('Viewed Homepage-4 Page', { locale: 'en-GB' }, undefined);
         });
-
-        expect(global.ga)
-          .to.have.been.calledOnce;
-
-        expect(analytics.track)
-          .to.have.been.calledWith('Viewed Homepage-4 Page', { locale: 'en-GB' }, undefined);
       });
     });
     describe('callbacks', () => {
@@ -171,10 +171,10 @@ describe('analytics', () => {
     it('should call an identify ga() function', () => {
       global.ga.reset();
 
-      analytics.identify('12345');
-
-      expect(global.ga)
-        .to.have.been.calledOnce;
+      analytics.identify('12345', () => {
+        expect(global.ga)
+          .to.have.been.calledOnce;
+      });
     });
 
     it('should call additional dimension calls for each Experiment trait', () => {
@@ -183,10 +183,10 @@ describe('analytics', () => {
       analytics.identify('12345', {
         'Experiment: Exp 1234567890': '1_control',
         'Experiment: Exp 0987654321': '2_variant'
+      }, () => {
+        expect(global.ga)
+          .to.have.been.calledThrice;
       });
-
-      expect(global.ga)
-        .to.have.been.calledThrice;
     });
 
     it('should not call dimension calls for non Experiment traits', () => {
@@ -195,10 +195,10 @@ describe('analytics', () => {
       analytics.identify('12345', {
         locale: 'en-GB',
         email: 'test@example.com'
+      }, () => {
+        expect(global.ga)
+          .to.have.been.calledOnce;
       });
-
-      expect(global.ga)
-        .to.have.been.calledOnce;
     });
 
     describe('argument shuffling', () => {
@@ -207,19 +207,19 @@ describe('analytics', () => {
 
         analytics.identify('12345', {
           trait: 'test'
-        }, () => {});
-
-        expect(global.ga)
-          .to.have.been.calledOnce;
+        }, () => {
+          expect(global.ga)
+            .to.have.been.calledOnce;
+        });
       });
 
       it('should still pass data if options and traits are omitted', () => {
         global.ga.reset();
 
-        analytics.identify('12345123', () => {});
-
-        expect(global.ga)
-          .to.have.been.calledOnce;
+        analytics.identify('12345123', () => {
+          expect(global.ga)
+            .to.have.been.calledOnce;
+        });
       });
     });
 
@@ -249,6 +249,41 @@ describe('analytics', () => {
     it('returns null if no key matches', () => {
       expect((analytics.getDimensionFromName('BREAKING') === undefined))
         .to.equal(true);
+    });
+  });
+});
+
+describe('async ga', () => {
+  beforeEach(() => {
+    spy(global, 'ga');
+    setTimeout(() => global.ga = () => {}, 150);
+  });
+
+  describe('track', () => {
+    it('waits for ga to be defined', () => {
+      analytics.track('Custom Event', () => {
+        expect(global.ga)
+          .to.have.been.calledOnce;
+        global.ga.reset();
+      });
+    });
+  });
+  describe('page', () => {
+    it('waits for ga to be defined', () => {
+      analytics.page('Custom Page', () => {
+        expect(global.ga)
+          .to.have.been.calledOnce();
+        global.ga.reset();
+      });
+    });
+  });
+  describe('identify', () => {
+    it('waits for ga to be defined', () => {
+      analytics.identify('Custom ID', () => {
+        expect(global.ga)
+          .to.have.been.calledOnce();
+        global.ga.reset();
+      });
     });
   });
 });

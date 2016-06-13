@@ -1,62 +1,83 @@
 /* global ga */
+
+function ensureGA(timeout) {
+  var start = Date.now();
+  return new Promise(waitForGA);
+  function waitForGA(resolve, reject) {
+    if (typeof ga !== 'undefined') {
+      return resolve();
+    } else if (timeout && (Date.now() - start) >= timeout) {
+      return reject(new Error('Timeout'));
+    }
+    setTimeout(waitForGA.bind(this, resolve, reject), 50);
+  }
+}
 /**
  * Analytics wrapper for the Segment to GTM integration
  */
 const analytics = {
   track: function (action, properties, options, callback) {
-    if (typeof options === 'function') {
-      callback = options;
-      options = null;
-    }
-    if (typeof properties === 'function') {
-      callback = properties;
-      options = null;
-      properties = {};
-    }
-    if (!properties) {
-      properties = {};
-    }
-    if (typeof ga === 'function') {
-      ga('send', 'event', properties.category, action, properties.label, properties.value);
-    }
-    if (callback) {
-      callback();
-    }
-    return this;
+    ensureGA()
+      .then(() => {
+        if (typeof options === 'function') {
+          callback = options;
+          options = null;
+        }
+        if (typeof properties === 'function') {
+          callback = properties;
+          options = null;
+          properties = {};
+        }
+        if (!properties) {
+          properties = {};
+        }
+        if (typeof ga === 'function') {
+          ga('send', 'event', properties.category, action, properties.label, properties.value);
+        }
+        if (callback) {
+          callback();
+        }
+        return this;
+      });
   },
   page: function (category, name, properties, options, callback) {
-    if (typeof options === 'function') {
-      callback = options;
-      options = null;
-    }
-    if (typeof properties === 'function') {
-      callback = properties;
-      options = null;
-      properties = null;
-    }
-    if (typeof name === 'function') {
-      callback =  name;
-      options = null;
-      properties = null;
-      name = null;
-    }
-    if (typeof name === 'object') {
-      options = properties;
-      properties = name;
-      name = null;
-    }
-    if (typeof category === 'string' && typeof name !== 'string') {
-      name = category;
-      category = null;
-    }
-    if (typeof ga === 'function' && typeof window !== 'undefined') {
-      ga('send', 'pageview', window.location.pathname);
-    }
-    this.track(`Viewed ${name} Page`, properties, options);
-    if (callback) {
-      callback();
-    }
-    return this;
+    ensureGA()
+      .then(() => {
+        if (typeof options === 'function') {
+          callback = options;
+          options = null;
+        }
+        if (typeof properties === 'function') {
+          callback = properties;
+          options = null;
+          properties = null;
+        }
+        if (typeof name === 'function') {
+          callback =  name;
+          options = null;
+          properties = null;
+          name = null;
+        }
+        if (typeof name === 'object') {
+          options = properties;
+          properties = name;
+          name = null;
+        }
+        if (typeof category === 'string' && typeof name !== 'string') {
+          name = category;
+          category = null;
+        }
+        if (typeof ga === 'function' && typeof window !== 'undefined') {
+          console.log(window.location.pathname);
+          ga('send', 'pageview', window.location.pathname);
+        }
+        this.track(`Viewed ${name} Page`, properties, options);
+        if (callback) {
+          callback();
+        }
+        return this;
+      });
+
   },
   getDimensionFromName: function (name) {
     // Get Gianluca to look at this - can GTM do it better?
@@ -78,32 +99,35 @@ const analytics = {
     return dimensions[name];
   },
   identify: function (id, traits, options, callback) {
-    if (typeof options === 'function') {
-      callback = options;
-      options = null;
-    }
-    if (typeof traits === 'function') {
-      callback = traits;
-      options = null;
-      traits = null;
-    }
-    if (typeof ga === 'function') {
-      ga('set', 'userId', id);
-    }
-    if (traits && typeof traits !== 'function') {
-      Object.keys(traits).forEach((trait) => {
-        if (trait.startsWith('Experiment:')) {
-          if (typeof ga === 'function') {
-            ga('set', this.getDimensionFromName(trait), traits[trait]);
-          }
+    ensureGA()
+      .then(() => {
+        if (typeof options === 'function') {
+          callback = options;
+          options = null;
         }
-      });
-    }
+        if (typeof traits === 'function') {
+          callback = traits;
+          options = null;
+          traits = null;
+        }
+        if (typeof ga === 'function') {
+          ga('set', 'userId', id);
+        }
+        if (traits && typeof traits !== 'function') {
+          Object.keys(traits).forEach((trait) => {
+            if (trait.startsWith('Experiment:')) {
+              if (typeof ga === 'function') {
+                ga('set', this.getDimensionFromName(trait), traits[trait]);
+              }
+            }
+          });
+        }
 
-    if (callback) {
-      callback();
-    }
-    return this;
+        if (callback) {
+          callback();
+        }
+        return this;
+      });
   },
   ready: function (callback) {
     if (callback) {
