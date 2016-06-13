@@ -138,7 +138,10 @@ const analytics = {
     return ensureGA()
       .then(() => {
         if (typeof ga === 'function') {
-          var tagName = ga.getAll()[1].get('name');
+          var tagName = ga.getAll()[0].get('name');
+          if (ga.getAll()[1]) {
+            tagName = ga.getAll()[1].get('name');
+          }
           ga(`${tagName}.ec:addImpression`, productObject);
         }
       });
