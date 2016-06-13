@@ -1,15 +1,15 @@
-/* global ga */
+/* global dataLayer */
 
-function ensureGA(timeout) {
+function ensureGTM(timeout) {
   var start = Date.now();
-  return new Promise(waitForGA);
-  function waitForGA(resolve, reject) {
-    if (typeof ga !== 'undefined' && ga.loaded) {
+  return new Promise(waitForGTM);
+  function waitForGTM(resolve, reject) {
+    if (typeof dataLayer !== 'undefined') {
       return resolve();
     } else if (timeout && (Date.now() - start) >= timeout) {
       return reject(new Error('Timeout'));
     }
-    setTimeout(waitForGA.bind(this, resolve, reject), 50);
+    setTimeout(waitForGTM.bind(this, resolve, reject), 50);
   }
 }
 /**
@@ -17,7 +17,7 @@ function ensureGA(timeout) {
  */
 const analytics = {
   track: function (action, properties, options, callback) {
-    return ensureGA()
+    return ensureGTM()
       .then(() => {
         if (typeof options === 'function') {
           callback = options;
@@ -34,17 +34,19 @@ const analytics = {
         if (!properties.category) {
           properties.category = 'All';
         }
-        if (typeof ga === 'function') {
-          var tagName = ga.getAll()[0].get('name');
-          ga(`${tagName}.send`, 'event', properties.category, action, properties.label, properties.value);
-        }
+        dataLayer.push({
+          event: action,
+          category: properties.category,
+          label: properties.label,
+          value: properties.value
+        });
         if (callback) {
           callback();
         }
       });
   },
   page: function (category, name, properties, options, callback) {
-    return ensureGA()
+    return ensureGTM()
       .then(() => {
         if (typeof options === 'function') {
           callback = options;
@@ -70,10 +72,6 @@ const analytics = {
           name = category;
           category = null;
         }
-        if (typeof ga === 'function' && typeof window !== 'undefined') {
-          var tagName = ga.getAll()[0].get('name');
-          ga(`${tagName}.send`, 'pageview', window.location.pathname);
-        }
         this.track(`Viewed ${name} Page`, properties, options);
         if (callback) {
           callback();
@@ -82,27 +80,8 @@ const analytics = {
       });
 
   },
-  getDimensionFromName: function (name) {
-    // Get Gianluca to look at this - can GTM do it better?
-    const dimensions = {
-      'Experiment: Exp 4972080620': 'dimension4',
-      'Experiment: Exp 5139652954': 'dimension11',
-      'Experiment: Exp 5332020036': 'dimension6',
-      'Experiment: Exp 5338213541': 'dimension14',
-      'Experiment: Exp 5344250821': 'dimension5',
-      'Experiment: Exp 5470320276': 'dimension10',
-      'Experiment: Exp 5533390779': 'dimension9',
-      'Experiment: Exp 5711160113': 'dimension15',
-      'Experiment: Exp 5777770141': 'dimension7',
-      'Experiment: Exp 5957381339': 'dimension8',
-      'Experiment: Exp 6010632105': 'dimension7',
-      containsDeluxe: 'dimension13',
-      containsGiftWrap: 'dimension12'
-    };
-    return dimensions[name];
-  },
   identify: function (id, traits, options, callback) {
-    return ensureGA()
+    return ensureGTM()
       .then(() => {
         if (typeof options === 'function') {
           callback = options;
@@ -113,17 +92,18 @@ const analytics = {
           options = null;
           traits = null;
         }
-        if (typeof ga === 'function') {
-          var tagName = ga.getAll()[0].get('name');
-          ga(`${tagName}.set`, 'userId', id);
-        }
+        dataLayer.push({
+          user: {
+            userId: id
+          }
+        });
         if (traits && typeof traits !== 'function') {
           Object.keys(traits).forEach((trait) => {
             if (trait.startsWith('Experiment:')) {
-              if (typeof ga === 'function') {
-                var tagName = ga.getAll()[0].get('name');
-                ga(`${tagName}.set`, this.getDimensionFromName(trait), traits[trait]);
-              }
+              dataLayer.push({
+                experimentName: trait,
+                experimentVariant: traits[trait]
+              });
             }
           });
         }
@@ -134,16 +114,14 @@ const analytics = {
         return this;
       });
   },
-  impression: function (productObject) {
-    return ensureGA()
+  impression: function (impressions) {
+    return ensureGTM()
       .then(() => {
-        if (typeof ga === 'function') {
-          var tagName = ga.getAll()[0].get('name');
-          if (ga.getAll()[1]) {
-            tagName = ga.getAll()[1].get('name');
+        dataLayer.push({
+          ecommerce: {
+            impressions: impressions
           }
-          ga(`${tagName}.ec:addImpression`, productObject);
-        }
+        });
       });
   },
   ready: function (callback) {

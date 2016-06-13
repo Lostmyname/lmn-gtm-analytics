@@ -1,77 +1,78 @@
+/* eslint-disable max-nested-callbacks */
 import analytics from '../../src/lmn-gtm-analytics';
 
 describe('analytics', () => {
   beforeEach(() => {
-    global.ga = function () {
-      this.loaded = true;
-      this.getAll = function () {
-        return [
-          {
-            get: function (str) {
-              return str;
-            }
-          }
-        ];
-      };
-    };
-    spy(global, 'ga');
+    global.dataLayer = [];
   });
   describe('track function', () => {
-    it('should call the ga() function', () => {
+    it('should call the dataLayer push', () => {
       analytics.track('Custom Event', {
         category: 'test',
         label: 'test'
       })
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledOnce;
+          expect(global.dataLayer)
+            .length.to.equal(1);
         });
     });
 
     describe('argument shuffling', () => {
       it('should pass data if no callback is set', () => {
-        global.ga.reset();
 
         analytics.track('Custom Event', {
           category: 'Category',
           label: 'Label'
         })
           .then(() => {
-            expect(global.ga)
-              .to.have.been.calledWith('send', 'event', 'Category', 'Custom Event', 'Label', undefined);
+            expect(global.dataLayer.slice(-1)[0])
+              .to.eql({
+                event: 'Custom Event',
+                category: 'Category',
+                label: 'Label',
+                value: undefined
+              });
           });
       });
 
       it('should pass data if no callback or options are set', () => {
-        global.ga.reset();
-
         analytics.track('Custom Event-2', {
           category: 'Category-2',
-          label: 'Label-2'
+          label: 'Label-2',
+          value: 'Value-2'
         }, {
           integrations: {
             Optimizely: false
           }
         })
           .then(() => {
-            expect(global.ga)
-              .to.have.been.calledWith('send', 'event', 'Category-2', 'Custom Event-2', 'Label-2', undefined);
+            expect(global.dataLayer.slice(-1)[0])
+              .to.eql({
+                event: 'Custom Event-2',
+                category: 'Category-2',
+                label: 'Label-2',
+                value: 'Value-2'
+              });
           });
       });
 
       it('should pass data if no callback, options, or properties are set', () => {
-        global.ga.reset();
 
         analytics.track('Custom Event-3')
           .then(() => {
-            expect(global.ga)
-              .to.have.been.calledWith('send', 'event', 'All', 'Custom Event-3', undefined, undefined);
+            expect(global.dataLayer.slice(-1)[0])
+              .to.eql({
+                event: 'Custom Event-3',
+                category: 'All',
+                label: undefined,
+                value: undefined
+              });
           });
       });
     });
 
     describe('callbacks', () => {
-      it.skip('should run a callback with all arguments passed', (done) => {
+      it('should run a callback with all arguments passed', (done) => {
         analytics.track('Custom Event', {
           category: 'test',
           label: 'test'
@@ -82,14 +83,14 @@ describe('analytics', () => {
         }, () => done());
       });
 
-      it.skip('should shuffle the arguments if no options are set', (done) => {
+      it('should shuffle the arguments if no options are set', (done) => {
         analytics.track('Custom Event', {
           category: 'test',
           label: 'test'
         }, () => done());
       });
 
-      it.skip('should shuffle the arguments if no options or properties arguments are set', (done) => {
+      it('should shuffle the arguments if no options or properties arguments are set', (done) => {
         analytics.track('Custom Event', () => done());
       });
     });
@@ -101,80 +102,78 @@ describe('analytics', () => {
       spy(analytics, 'track');
     });
 
-    it('should call the ga() function', () => {
-      global.ga.reset();
+    it('should call the dataLayer push', () => {
 
       analytics.page('Creation Canvas', {
         locale: 'en-GB',
         orientation: 'landscape'
       })
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledOnce;
-
-          expect(analytics.track)
-            .to.have.been.calledOnce;
-
-          expect(analytics.track)
-            .to.have.been.calledWith('send', 'event', 'All', 'Viewed Creation Canvas Page', undefined, undefined);
+          expect(global.dataLayer.slice(-1)[0])
+            .to.eql({
+              event: 'Viewed Creation Canvas Page',
+              category: 'All',
+              label: undefined,
+              value: undefined
+            });
         });
     });
 
     describe('argument shuffling', () => {
       it('should still pass data if the options argument is omitted', () => {
-        global.ga.reset();
-
         analytics.page('Category', 'Homepage', {
           test: 'test'
         })
           .then(() => {
-            expect(global.ga)
-              .to.have.been.calledOnce;
-
-            expect(analytics.track)
-              .to.have.been.calledWith('Viewed Homepage Page', { test: 'test' }, null);
+            expect(global.dataLayer.slice(-1)[0])
+              .to.eql({
+                event: 'Viewed Homepage Page',
+                category: 'All',
+                label: undefined,
+                value: undefined
+              });
           });
       });
 
       it('should still pass data if options and properties are removed', () => {
-        global.ga.reset();
-
         analytics.page('Category-2', 'Homepage-2')
-          .then(() => {
-            expect(global.ga)
-              .to.have.been.calledOnce;
-
-            expect(analytics.track)
-              .to.have.been.calledWith('Viewed Homepage-2 Page', null, null);
-          });
+        .then(() => {
+          expect(global.dataLayer.slice(-1)[0])
+            .to.eql({
+              event: 'Viewed Homepage-2 Page',
+              category: 'All',
+              label: undefined,
+              value: undefined
+            });
+        });
       });
 
       it('should still pass data if options, properties and name are omitted', () => {
-        global.ga.reset();
-
         analytics.page('Homepage-3')
-          .then(() => {
-            expect(global.ga)
-              .to.have.been.calledOnce;
-
-            expect(analytics.track)
-              .to.have.been.calledWith('Viewed Homepage-3 Page', null, null);
-          });
+        .then(() => {
+          expect(global.dataLayer.slice(-1)[0])
+            .to.eql({
+              event: 'Viewed Homepage-3 Page',
+              category: 'All',
+              label: undefined,
+              value: undefined
+            });
+        });
       });
 
       it('should still pass data if category is a string and name is not a string', () => {
-        global.ga.reset();
-
         analytics.page('Homepage-4', {
           locale: 'en-GB'
         })
-          .then(() => {
-            expect(global.ga)
-              .to.have.been.calledOnce;
-
-            expect(analytics.track)
-              .to.have.been.calledWith('Viewed Homepage-4 Page', { locale: 'en-GB' }, undefined);
-          });
+        .then(() => {
+          expect(global.dataLayer.slice(-1)[0])
+            .to.eql({
+              event: 'Viewed Homepage-4 Page',
+              category: 'All',
+              label: undefined,
+              value: undefined
+            });
+        });
       });
     });
     describe('callbacks', () => {
@@ -191,62 +190,82 @@ describe('analytics', () => {
   });
 
   describe('identify function', () => {
-    it('should call an identify ga() function', () => {
-      global.ga.reset();
-
+    it('should call an identify dataLayer push', () => {
       analytics.identify('12345')
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledOnce;
+          expect(global.dataLayer.slice(-1)[0])
+            .to.eql({
+              user: {
+                userId: '12345'
+              }
+            });
         });
     });
 
     it('should call additional dimension calls for each Experiment trait', () => {
-      global.ga.reset();
-
       analytics.identify('12345', {
         'Experiment: Exp 1234567890': '1_control',
         'Experiment: Exp 0987654321': '2_variant'
       })
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledThrice;
+          expect(global.dataLayer.slice(-1)[0])
+            .to.eql({
+              user: {
+                userId: '12345'
+              }
+            });
+          expect(global.dataLayer.slice(-2)[0])
+            .to.eql({
+              experimentName: 'Experiment: Exp 1234567890',
+              experimentVariant: '1_control'
+            });
+          expect(global.dataLayer.slice(-3)[0])
+            .to.eql({
+              experimentName: 'Experiment: Exp 0987654321',
+              experimentVariant: '2_variant'
+            });
         });
     });
 
     it('should not call dimension calls for non Experiment traits', () => {
-      global.ga.reset();
-
       analytics.identify('12345', {
         locale: 'en-GB',
         email: 'test@example.com'
       })
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledOnce;
+          expect(global.dataLayer.slice(-1)[0])
+            .to.eql({
+              user: {
+                userId: '12345'
+              }
+            });
         });
     });
 
     describe('argument shuffling', () => {
       it('should still pass data if options is omitted', () => {
-        global.ga.reset();
-
         analytics.identify('12345', {
           trait: 'test'
         })
           .then(() => {
-            expect(global.ga)
-              .to.have.been.calledOnce;
+            expect(global.dataLayer.slice(-1)[0])
+              .to.eql({
+                user: {
+                  userId: '12345'
+                }
+              });
           });
       });
 
       it('should still pass data if options and traits are omitted', () => {
-        global.ga.reset();
-
         analytics.identify('12345123')
           .then(() => {
-            expect(global.ga)
-              .to.have.been.calledOnce;
+            expect(global.dataLayer.slice(-1)[0])
+              .to.eql({
+                user: {
+                  userId: '12345123'
+                }
+              });
           });
       });
     });
@@ -269,81 +288,69 @@ describe('analytics', () => {
     it('should callback', (done) => analytics.ready(done()));
   });
 
-  describe('getDimensionFromName function', () => {
-    it('returns a value if one of the keys exists', () => {
-      expect(analytics.getDimensionFromName('Experiment: Exp 4972080620'))
-        .to.equal('dimension4');
-    });
-    it('returns null if no key matches', () => {
-      expect((analytics.getDimensionFromName('BREAKING') === undefined))
-        .to.equal(true);
-    });
-  });
-
   describe('impression function', () => {
-    it('should call an impression ga() function', () => {
-      global.ga.reset();
+    it('should call an impression dataLayer push', () => {
 
-      analytics.impression({
+      analytics.impression([{
         id: 'P12345',
         name: 'Product Name'
-      })
+      }])
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledOnce;
-          expect(global.ga)
-            .to.have.been.calledWith('ec:addImpression', { id: 'P12345', name: 'Product Name' });
+          expect(global.dataLayer.slice(-1)[0])
+            .to.eql({
+              ecommerce: {
+                impressions: [{
+                  id: 'P12345',
+                  name: 'Product Name'
+                }]
+              }
+            });
         });
     });
 
   });
 });
 
-describe('async ga', () => {
+describe('async dataLayer', () => {
   beforeEach(() => {
-    spy(global, 'ga');
-    setTimeout(() => global.ga = () => {}, 150);
+    setTimeout(() => global.dataLayer = [], 150);
   });
 
   describe('track', () => {
-    it('waits for ga to be defined', () => {
+    it('waits for dataLayer to be defined', () => {
       analytics.track('Custom Event')
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledOnce;
-          global.ga.reset();
+          expect(global.dataLayer)
+            .to.not.equal(undefined);
         });
     });
   });
   describe('page', () => {
-    it('waits for ga to be defined', () => {
+    it('waits for dataLayer to be defined', () => {
       analytics.page('Custom Event')
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledOnce;
-          global.ga.reset();
+          expect(global.dataLayer)
+            .to.not.equal(undefined);
         });
     });
   });
   describe('identify', () => {
-    it('waits for ga to be defined', () => {
+    it('waits for dataLayer to be defined', () => {
       analytics.identify('Custom Event')
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledOnce;
-          global.ga.reset();
+          expect(global.dataLayer)
+            .to.not.equal(undefined);
         });
     });
   });
   describe('impression', () => {
-    it('waits for ga to be defined', () => {
+    it('waits for dataLayer to be defined', () => {
       analytics.impression({
         name: 'Product Name'
       })
         .then(() => {
-          expect(global.ga)
-            .to.have.been.calledOnce;
-          global.ga.reset();
+          expect(global.dataLayer)
+            .to.not.equal(undefined);
         });
     });
   });
