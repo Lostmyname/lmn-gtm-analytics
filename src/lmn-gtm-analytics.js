@@ -67,7 +67,6 @@ const analytics = {
           category = null;
         }
         if (typeof ga === 'function' && typeof window !== 'undefined') {
-          console.log(window.location.pathname);
           ga('send', 'pageview', window.location.pathname);
         }
         this.track(`Viewed ${name} Page`, properties, options);
