@@ -35,12 +35,12 @@ const lmnAnalytics = {
         if (!properties.category) {
           properties.category = 'All';
         }
-        dataLayer.push({
+        dataLayer.push(Object.assign(properties, {
           event: action,
           category: properties.category,
           label: properties.label,
           value: properties.value
-        });
+        }));
         if (callback) {
           callback();
         }
