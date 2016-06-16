@@ -1,13 +1,21 @@
 /* eslint-disable max-nested-callbacks */
-import analytics from '../../src/lmn-gtm-analytics';
+import lmnAnalytics from '../../src/lmn-gtm-analytics';
 
-describe('analytics', () => {
+describe('lmnAnalytics', () => {
   beforeEach(() => {
+    global.analytics = {
+      track: function () {},
+      page: function () {},
+      identify: function () {}
+    };
     global.dataLayer = [];
+    spy(global.analytics, 'track');
+    spy(global.analytics, 'page');
+    spy(global.analytics, 'identify');
   });
   describe('track function', () => {
     it('should call the dataLayer push', () => {
-      analytics.track('Custom Event', {
+      lmnAnalytics.track('Custom Event', {
         category: 'test',
         label: 'test'
       })
@@ -17,10 +25,35 @@ describe('analytics', () => {
         });
     });
 
+    it('should call the analytics.track function', () => {
+      lmnAnalytics.track('Custom Event', {
+        category: 'test',
+        label: 'test'
+      })
+        .then(() => {
+          expect(global.analytics.track)
+            .to.have.been.calledOnce;
+        });
+    });
+
+    it('should call the analytics.track function with the same arguments', () => {
+      lmnAnalytics.track('Custom Event', {
+        category: 'test',
+        label: 'test'
+      })
+        .then(() => {
+          expect(global.analytics.track)
+            .to.have.been.calledWith('Custom Event', {
+              category: 'test',
+              label: 'test'
+            });
+        });
+    });
+
     describe('argument shuffling', () => {
       it('should pass data if no callback is set', () => {
 
-        analytics.track('Custom Event', {
+        lmnAnalytics.track('Custom Event', {
           category: 'Category',
           label: 'Label'
         })
@@ -36,7 +69,7 @@ describe('analytics', () => {
       });
 
       it('should pass data if no callback or options are set', () => {
-        analytics.track('Custom Event-2', {
+        lmnAnalytics.track('Custom Event-2', {
           category: 'Category-2',
           label: 'Label-2',
           value: 'Value-2'
@@ -58,7 +91,7 @@ describe('analytics', () => {
 
       it('should pass data if no callback, options, or properties are set', () => {
 
-        analytics.track('Custom Event-3')
+        lmnAnalytics.track('Custom Event-3')
           .then(() => {
             expect(global.dataLayer.slice(-1)[0])
               .to.eql({
@@ -73,7 +106,7 @@ describe('analytics', () => {
 
     describe('callbacks', () => {
       it('should run a callback with all arguments passed', (done) => {
-        analytics.track('Custom Event', {
+        lmnAnalytics.track('Custom Event', {
           category: 'test',
           label: 'test'
         }, {
@@ -84,14 +117,14 @@ describe('analytics', () => {
       });
 
       it('should shuffle the arguments if no options are set', (done) => {
-        analytics.track('Custom Event', {
+        lmnAnalytics.track('Custom Event', {
           category: 'test',
           label: 'test'
         }, () => done());
       });
 
       it('should shuffle the arguments if no options or properties arguments are set', (done) => {
-        analytics.track('Custom Event', () => done());
+        lmnAnalytics.track('Custom Event', () => done());
       });
     });
   });
@@ -99,12 +132,12 @@ describe('analytics', () => {
   describe('page function', () => {
 
     beforeEach(() => {
-      spy(analytics, 'track');
+      spy(lmnAnalytics, 'track');
     });
 
     it('should call the dataLayer push', () => {
 
-      analytics.page('Creation Canvas', {
+      lmnAnalytics.page('Creation Canvas', {
         locale: 'en-GB',
         orientation: 'landscape'
       })
@@ -119,9 +152,31 @@ describe('analytics', () => {
         });
     });
 
+    it('should call analytics.page ()', () => {
+      lmnAnalytics.page('Creation Canvas', {
+        locale: 'en-GB'
+      })
+        .then(() => {
+          expect(global.analytics.page)
+            .to.have.been.calledOnce;
+        });
+    });
+
+    it('should call analytics.page() with the right arguments', () => {
+      lmnAnalytics.page('Creation Canvas', {
+        locale: 'en-GB'
+      })
+        .then(() => {
+          expect(global.analytics.page)
+            .to.have.been.calledWith('Creation Canvas', {
+              locale: 'en-GB'
+            });
+        });
+    });
+
     describe('argument shuffling', () => {
       it('should still pass data if the options argument is omitted', () => {
-        analytics.page('Category', 'Homepage', {
+        lmnAnalytics.page('Category', 'Homepage', {
           test: 'test'
         })
           .then(() => {
@@ -136,7 +191,7 @@ describe('analytics', () => {
       });
 
       it('should still pass data if options and properties are removed', () => {
-        analytics.page('Category-2', 'Homepage-2')
+        lmnAnalytics.page('Category-2', 'Homepage-2')
         .then(() => {
           expect(global.dataLayer.slice(-1)[0])
             .to.eql({
@@ -149,7 +204,7 @@ describe('analytics', () => {
       });
 
       it('should still pass data if options, properties and name are omitted', () => {
-        analytics.page('Homepage-3')
+        lmnAnalytics.page('Homepage-3')
         .then(() => {
           expect(global.dataLayer.slice(-1)[0])
             .to.eql({
@@ -162,7 +217,7 @@ describe('analytics', () => {
       });
 
       it('should still pass data if category is a string and name is not a string', () => {
-        analytics.page('Homepage-4', {
+        lmnAnalytics.page('Homepage-4', {
           locale: 'en-GB'
         })
         .then(() => {
@@ -178,20 +233,20 @@ describe('analytics', () => {
     });
     describe('callbacks', () => {
       it('should callback if provided', (done) => {
-        analytics.page('Category', 'Homepage-1', {}, {}, done());
+        lmnAnalytics.page('Category', 'Homepage-1', {}, {}, done());
       });
       it('should callback if options is the callback', (done) => {
-        analytics.page('Category', 'Homepage-1', {}, done());
+        lmnAnalytics.page('Category', 'Homepage-1', {}, done());
       });
       it('should callback if properties is the callback', (done) => {
-        analytics.page('Category', 'Homepage-2', done());
+        lmnAnalytics.page('Category', 'Homepage-2', done());
       });
     });
   });
 
   describe('identify function', () => {
     it('should call an identify dataLayer push', () => {
-      analytics.identify('12345')
+      lmnAnalytics.identify('12345')
         .then(() => {
           expect(global.dataLayer.slice(-1)[0])
             .to.eql({
@@ -202,8 +257,30 @@ describe('analytics', () => {
         });
     });
 
+    it('should call the analytics.identify function', () => {
+      lmnAnalytics.identify('12345', {
+        email: 'test@example.com'
+      })
+        .then(() => {
+          expect(global.analytics.identify)
+            .to.have.been.calledOnce;
+        });
+    });
+
+    it('should call the analytics.identify function with the right arguments', () => {
+      lmnAnalytics.identify('12345', {
+        email: 'test@example.com'
+      })
+        .then(() => {
+          expect(global.analytics.identify)
+            .to.have.been.calledWith('12345', {
+              email: 'test@example.com'
+            });
+        });
+    });
+
     it('should call additional dimension calls for each Experiment trait', () => {
-      analytics.identify('12345', {
+      lmnAnalytics.identify('12345', {
         'Experiment: Exp 1234567890': '1_control',
         'Experiment: Exp 0987654321': '2_variant'
       })
@@ -228,7 +305,7 @@ describe('analytics', () => {
     });
 
     it('should not call dimension calls for non Experiment traits', () => {
-      analytics.identify('12345', {
+      lmnAnalytics.identify('12345', {
         locale: 'en-GB',
         email: 'test@example.com'
       })
@@ -244,7 +321,7 @@ describe('analytics', () => {
 
     describe('argument shuffling', () => {
       it('should still pass data if options is omitted', () => {
-        analytics.identify('12345', {
+        lmnAnalytics.identify('12345', {
           trait: 'test'
         })
           .then(() => {
@@ -258,7 +335,7 @@ describe('analytics', () => {
       });
 
       it('should still pass data if options and traits are omitted', () => {
-        analytics.identify('12345123')
+        lmnAnalytics.identify('12345123')
           .then(() => {
             expect(global.dataLayer.slice(-1)[0])
               .to.eql({
@@ -272,26 +349,26 @@ describe('analytics', () => {
 
     describe('callbacks', () => {
       it('should callback if provided', (done) => {
-        analytics.identify('12345', {}, {}, done());
+        lmnAnalytics.identify('12345', {}, {}, done());
       });
       it('should callback if the options is omitted', (done) => {
-        analytics.identify('12345', {}, done());
+        lmnAnalytics.identify('12345', {}, done());
       });
 
       it('should callback if options and traits are omitted', (done) => {
-        analytics.identify('12345', done());
+        lmnAnalytics.identify('12345', done());
       });
     });
   });
 
   describe('ready function', () => {
-    it('should callback', (done) => analytics.ready(done()));
+    it('should callback', (done) => lmnAnalytics.ready(done()));
   });
 
   describe('impression function', () => {
     it('should call an impression dataLayer push', () => {
 
-      analytics.impression([{
+      lmnAnalytics.impression([{
         id: 'P12345',
         name: 'Product Name'
       }])
@@ -318,7 +395,7 @@ describe('async dataLayer', () => {
 
   describe('track', () => {
     it('waits for dataLayer to be defined', () => {
-      analytics.track('Custom Event')
+      lmnAnalytics.track('Custom Event')
         .then(() => {
           expect(global.dataLayer)
             .to.not.equal(undefined);
@@ -327,7 +404,7 @@ describe('async dataLayer', () => {
   });
   describe('page', () => {
     it('waits for dataLayer to be defined', () => {
-      analytics.page('Custom Event')
+      lmnAnalytics.page('Custom Event')
         .then(() => {
           expect(global.dataLayer)
             .to.not.equal(undefined);
@@ -336,7 +413,7 @@ describe('async dataLayer', () => {
   });
   describe('identify', () => {
     it('waits for dataLayer to be defined', () => {
-      analytics.identify('Custom Event')
+      lmnAnalytics.identify('Custom Event')
         .then(() => {
           expect(global.dataLayer)
             .to.not.equal(undefined);
@@ -345,7 +422,7 @@ describe('async dataLayer', () => {
   });
   describe('impression', () => {
     it('waits for dataLayer to be defined', () => {
-      analytics.impression({
+      lmnAnalytics.impression({
         name: 'Product Name'
       })
         .then(() => {
