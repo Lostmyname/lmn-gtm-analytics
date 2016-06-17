@@ -37,6 +37,7 @@ const lmnAnalytics = {
         }
         dataLayer.push(Object.assign(properties, {
           event: action,
+          action: action,
           category: properties.category,
           label: properties.label,
           value: properties.value
