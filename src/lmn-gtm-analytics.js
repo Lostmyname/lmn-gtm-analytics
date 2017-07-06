@@ -78,6 +78,7 @@ const lmnAnalytics = {
       if (callback) {
         callback();
       }
+      dataLayer.push(properties);
       return this;
     });
   },
