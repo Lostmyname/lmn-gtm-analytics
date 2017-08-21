@@ -18,7 +18,6 @@ function ensureGTM(timeout) {
 const lmnAnalytics = {
   track: function (action, properties, options, callback) {
     return ensureGTM().then(() => {
-      analytics.track.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
         options = null;
@@ -50,7 +49,6 @@ const lmnAnalytics = {
   },
   page: function (category, name, properties, options, callback) {
     return ensureGTM().then(() => {
-      analytics.page.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
         options = null;
@@ -84,7 +82,6 @@ const lmnAnalytics = {
   },
   identify: function (id, traits, options, callback) {
     return ensureGTM().then(() => {
-      analytics.identify.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
         options = null;
