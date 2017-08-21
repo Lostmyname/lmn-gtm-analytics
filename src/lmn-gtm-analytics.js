@@ -1,4 +1,5 @@
-/* global analytics, dataLayer */
+/* global dataLayer */
+/* exported analytics */
 
 function ensureGTM(timeout) {
   var start = Date.now();
@@ -15,7 +16,7 @@ function ensureGTM(timeout) {
 /**
  * Analytics wrapper for the Segment to GTM integration
  */
-const lmnAnalytics = {
+const analytics = {
   track: function (action, properties, options, callback) {
     return ensureGTM().then(() => {
       if (typeof options === 'function') {
@@ -115,9 +116,6 @@ const lmnAnalytics = {
   },
   impression: function (impressions) {
     return ensureGTM().then(() => {
-      impressions.forEach(impression => {
-        analytics.track('Viewed Impression', impression);
-      });
       dataLayer.push({
         ecommerce: {
           impressions: impressions
@@ -133,4 +131,4 @@ const lmnAnalytics = {
   }
 };
 
-export default lmnAnalytics;
+export default analytics;
