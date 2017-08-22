@@ -45,7 +45,7 @@ const analytics = {
         properties = {};
       }
       if (!properties.category) {
-        properties.category = 'All';
+        properties.category = 'undefinedCategory';
       }
       if (callback) {
         callback();
