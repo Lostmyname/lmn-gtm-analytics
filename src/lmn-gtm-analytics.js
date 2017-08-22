@@ -13,6 +13,19 @@ function ensureGTM(timeout) {
     setTimeout(waitForGTM.bind(this, resolve, reject), 50);
   }
 }
+
+function enableDebugMode() {
+  return window.location.search.substring(1).includes('debug-analytics');
+}
+
+function triggerEvent(event) {
+  if (enableDebugMode()) {
+    console.log(event);
+  }
+
+  return dataLayer.push(event);
+}
+
 /**
  * Analytics wrapper for the Segment to GTM integration
  */
@@ -34,7 +47,10 @@ const analytics = {
       if (!properties.category) {
         properties.category = 'All';
       }
-      dataLayer.push(
+      if (callback) {
+        callback();
+      }
+      triggerEvent(
         Object.assign(properties, {
           event: action,
           action: action,
@@ -43,9 +59,6 @@ const analytics = {
           value: properties.value
         })
       );
-      if (callback) {
-        callback();
-      }
     });
   },
   page: function (category, name, properties, options, callback) {
