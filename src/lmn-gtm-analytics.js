@@ -1,4 +1,5 @@
-/* global analytics, dataLayer */
+/* global dataLayer */
+/* exported analytics */
 
 function ensureGTM(timeout) {
   var start = Date.now();
@@ -12,13 +13,25 @@ function ensureGTM(timeout) {
     setTimeout(waitForGTM.bind(this, resolve, reject), 50);
   }
 }
+
+function enableDebugMode() {
+  return window.location.search.substring(1).includes('debug-analytics');
+}
+
+function triggerEvent(event) {
+  if (enableDebugMode()) {
+    console.log(event);
+  }
+
+  return dataLayer.push(event);
+}
+
 /**
  * Analytics wrapper for the Segment to GTM integration
  */
-const lmnAnalytics = {
+const analytics = {
   track: function (action, properties, options, callback) {
     return ensureGTM().then(() => {
-      analytics.track.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
         options = null;
@@ -32,9 +45,12 @@ const lmnAnalytics = {
         properties = {};
       }
       if (!properties.category) {
-        properties.category = 'All';
+        properties.category = 'undefinedCategory';
       }
-      dataLayer.push(
+      if (callback) {
+        callback();
+      }
+      triggerEvent(
         Object.assign(properties, {
           event: action,
           action: action,
@@ -43,14 +59,10 @@ const lmnAnalytics = {
           value: properties.value
         })
       );
-      if (callback) {
-        callback();
-      }
     });
   },
   page: function (category, name, properties, options, callback) {
     return ensureGTM().then(() => {
-      analytics.page.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
         options = null;
@@ -84,7 +96,6 @@ const lmnAnalytics = {
   },
   identify: function (id, traits, options, callback) {
     return ensureGTM().then(() => {
-      analytics.identify.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
         options = null;
@@ -118,9 +129,6 @@ const lmnAnalytics = {
   },
   impression: function (impressions) {
     return ensureGTM().then(() => {
-      impressions.forEach(impression => {
-        analytics.track('Viewed Impression', impression);
-      });
       dataLayer.push({
         ecommerce: {
           impressions: impressions
@@ -136,4 +144,4 @@ const lmnAnalytics = {
   }
 };
 
-export default lmnAnalytics;
+export default analytics;
