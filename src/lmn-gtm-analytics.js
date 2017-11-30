@@ -26,6 +26,7 @@ function uuidv4() {
 
 function ensureSetup(timeout) {
   var start = Date.now();
+  debugger;
   eventProperties.timestamp = + new Date();
   if (typeof ga !== 'undefined') {
     eventProperties.gaCookieId = ga.getAll()[0].get('clientId');
