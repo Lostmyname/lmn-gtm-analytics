@@ -1,7 +1,30 @@
-/* global analytics, dataLayer */
+/* global analytics, dataLayer, ga, crypto */
 
-function ensureGTM(timeout) {
+let eventProperties = {
+  ga_cookie_id: null,
+  user_id: null,
+  timestamp: null
+}
+
+// https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+function uuidv4() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+  (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4)
+    .toString(16)
+  )
+}
+
+
+function ensureSetup(timeout) {
   var start = Date.now();
+  eventProperties.timestamp = + new Date();
+  if (typeof ga !== 'undefined') {
+    eventProperties.ga_cookie_id = ga.getAll()[0].get('clientId');
+  }
+  eventProperties.user_id = uuidv4();
+
+  debugger
+
   return new Promise(waitForGTM);
   function waitForGTM(resolve, reject) {
     if (typeof dataLayer !== 'undefined') {
@@ -17,7 +40,7 @@ function ensureGTM(timeout) {
  */
 const lmnAnalytics = {
   track: function (action, properties, options, callback) {
-    return ensureGTM().then(() => {
+    return ensureSetup().then(() => {
       analytics.track.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
@@ -49,7 +72,7 @@ const lmnAnalytics = {
     });
   },
   page: function (category, name, properties, options, callback) {
-    return ensureGTM().then(() => {
+    return ensureSetup().then(() => {
       analytics.page.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
@@ -83,7 +106,7 @@ const lmnAnalytics = {
     });
   },
   identify: function (id, traits, options, callback) {
-    return ensureGTM().then(() => {
+    return ensureSetup().then(() => {
       analytics.identify.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
@@ -117,7 +140,7 @@ const lmnAnalytics = {
     });
   },
   impression: function (impressions) {
-    return ensureGTM().then(() => {
+    return ensureSetup().then(() => {
       impressions.forEach(impression => {
         analytics.track('Viewed Impression', impression);
       });
