@@ -1,17 +1,26 @@
 /* global analytics, dataLayer, ga, crypto */
 
 let eventProperties = {
-  ga_cookie_id: null,
-  user_id: null,
+  gaCookieId: null,
+  userId: null,
   timestamp: null
-}
+};
 
 // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+//function uuidv4() {
+//  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+//  /*eslint no-bitwise: ["error", { "allow": ["&", ">>", "^"] }] */
+//  (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4)
+//    .toString(16)
+//  );
+//}
 function uuidv4() {
-  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-  (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4)
-    .toString(16)
-  )
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    /*eslint no-bitwise: ["error", { "allow": ["&", ">>", "|"] }] */
+    var r = Math.random() * 16 | 0;
+    var v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 
@@ -19,11 +28,11 @@ function ensureSetup(timeout) {
   var start = Date.now();
   eventProperties.timestamp = + new Date();
   if (typeof ga !== 'undefined') {
-    eventProperties.ga_cookie_id = ga.getAll()[0].get('clientId');
+    eventProperties.gaCookieId = ga.getAll()[0].get('clientId');
   }
-  eventProperties.user_id = uuidv4();
+  eventProperties.userIid = uuidv4();
 
-  debugger
+  debugger;
 
   return new Promise(waitForGTM);
   function waitForGTM(resolve, reject) {
