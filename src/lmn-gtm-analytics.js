@@ -1,6 +1,6 @@
 /* global analytics, dataLayer */
 
-function ensureGTM(timeout) {
+function ensureSetup(timeout) {
   var start = Date.now();
   return new Promise(waitForGTM);
   function waitForGTM(resolve, reject) {
@@ -17,7 +17,7 @@ function ensureGTM(timeout) {
  */
 const lmnAnalytics = {
   track: function (action, properties, options, callback) {
-    return ensureGTM().then(() => {
+    return ensureSetup().then(() => {
       analytics.track.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
@@ -49,7 +49,7 @@ const lmnAnalytics = {
     });
   },
   page: function (category, name, properties, options, callback) {
-    return ensureGTM().then(() => {
+    return ensureSetup().then(() => {
       analytics.page.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
@@ -83,7 +83,7 @@ const lmnAnalytics = {
     });
   },
   identify: function (id, traits, options, callback) {
-    return ensureGTM().then(() => {
+    return ensureSetup().then(() => {
       analytics.identify.apply(this, arguments);
       if (typeof options === 'function') {
         callback = options;
@@ -117,7 +117,7 @@ const lmnAnalytics = {
     });
   },
   impression: function (impressions) {
-    return ensureGTM().then(() => {
+    return ensureSetup().then(() => {
       impressions.forEach(impression => {
         analytics.track('Viewed Impression', impression);
       });
