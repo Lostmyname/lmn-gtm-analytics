@@ -14,16 +14,15 @@ describe('lmnAnalytics', () => {
     //spy(global.analytics, 'identify');
   });
   describe('track function', () => {
-    //it('should call the dataLayer push', () => {
-    //  lmnAnalytics.track('Custom Event', {
-    //    category: 'test',
-    //    label: 'test'
-    //  })
-    //    .then(() => {
-    //      expect(global.dataLayer)
-    //        .length.to.equal(1);
-    //    });
-    //});
+    it('should call the dataLayer push', () => {
+      lmnAnalytics.track('Custom Event', {
+        category: 'test',
+        label: 'test'
+      })
+        .then(() => {
+          expect(global.dataLayer.length).to.equal(1);
+        });
+    });
 
     //it('should call the analytics.track function', () => {
     //  lmnAnalytics.track('Custom Event', {
