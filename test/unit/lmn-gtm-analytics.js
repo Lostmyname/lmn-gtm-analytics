@@ -271,9 +271,6 @@ describe('lmnAnalytics', () => {
           trait: 'test'
         });
 
-        // @carmen
-        // note in the current implementation trait is not sent, is this right?
-
         expect(global.dataLayer[0].user.userId).eql('12345');
       });
 
