@@ -19,14 +19,14 @@ function getClientUuid() {
 }
 
 function getGaCookieId() {
-  return Cookies.get('_ga') || null;
+  return Cookies.get('_ga') || 'not-set';
 }
 
 function eventMetaData() {
   return {
-    sentTimestamp: + new Date(),
-    clientUuid: getClientUuid(),
-    gaCookieId: getGaCookieId()
+    sentTimestamp: (+new Date()).toString(),
+    clientUuid: getClientUuid().toString(),
+    gaCookieId: getGaCookieId().toString()
   };
 }
 

@@ -54,7 +54,8 @@ describe('lmnAnalytics', () => {
 
       expect(global.dataLayer[0].clientUuid).to.not.be.null;
       expect(global.dataLayer[0].sentTimestamp).to.not.be.null;
-      expect(global.dataLayer[0].gaCookieId).to.be.null;
+      expect(global.dataLayer[0].gaCookieId).to.be.eql('not-set');
+
     });
 
     describe('argument shuffling', () => {
@@ -165,7 +166,7 @@ describe('lmnAnalytics', () => {
 
       expect(global.dataLayer[0].clientUuid).to.not.be.null;
       expect(global.dataLayer[0].sentTimestamp).to.not.be.null;
-      expect(global.dataLayer[0].gaCookieId).to.be.null;
+      expect(global.dataLayer[0].gaCookieId).to.eql('not-set');
     });
 
     describe('argument shuffling', () => {
@@ -286,7 +287,7 @@ describe('lmnAnalytics', () => {
 
       expect(global.dataLayer[0].clientUuid).to.not.be.null;
       expect(global.dataLayer[0].sentTimestamp).to.not.be.null;
-      expect(global.dataLayer[0].gaCookieId).to.be.null;
+      expect(global.dataLayer[0].gaCookieId).to.eql('not-set');
     });
 
     describe('callbacks', () => {
@@ -326,7 +327,7 @@ describe('lmnAnalytics', () => {
 
       expect(global.dataLayer[0].clientUuid).to.not.be.null;
       expect(global.dataLayer[0].sentTimestamp).to.not.be.null;
-      expect(global.dataLayer[0].gaCookieId).to.be.null;
+      expect(global.dataLayer[0].gaCookieId).to.eql('not-set');
     });
   });
 });
