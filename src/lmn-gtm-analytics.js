@@ -30,8 +30,8 @@ function eventMetaData() {
   };
 }
 
-function argumentsWithEventMetaData(args) {
-  args[1] = Object.assign(args[1] || {}, eventMetaData());
+function argumentsWithEventMetaData(args, position = 1) {
+  args[position] = Object.assign(args[position] || {}, eventMetaData());
 
   return args;
 }
@@ -76,7 +76,7 @@ const lmnAnalytics = {
   },
   page: function (category, name, properties, options, callback) {
     ensureSetup();
-    analytics.page.apply(this, argumentsWithEventMetaData(arguments));
+    analytics.page.apply(this, argumentsWithEventMetaData(arguments, 2));
     if (typeof options === 'function') {
       callback = options;
       options = null;
