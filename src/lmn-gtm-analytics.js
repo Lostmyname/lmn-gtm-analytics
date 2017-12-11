@@ -3,17 +3,8 @@
 import Cookies from 'js-cookie';
 import uuid from 'uuid';
 
-function ensureSetup(timeout) {
-  var start = Date.now();
-  return new Promise(waitForGTM);
-  function waitForGTM(resolve, reject) {
-    if (typeof dataLayer !== 'undefined') {
-      return resolve();
-    } else if (timeout && Date.now() - start >= timeout) {
-      return reject(new Error('Timeout'));
-    }
-    setTimeout(waitForGTM.bind(this, resolve, reject), 50);
-  }
+function ensureSetup() {
+  window.dataLayer = window.dataLayer || [];
 }
 
 function getClientUuid() {
@@ -50,118 +41,114 @@ function argumentsWithEventMetaData(args) {
  */
 const lmnAnalytics = {
   track: function (action, properties, options, callback) {
-    return ensureSetup().then(() => {
-      analytics.track.apply(this, argumentsWithEventMetaData(arguments));
-      if (typeof options === 'function') {
-        callback = options;
-        options = null;
-      }
-      if (typeof properties === 'function') {
-        callback = properties;
-        options = null;
-        properties = {};
-      }
-      if (!properties) {
-        properties = {};
-      }
-      if (!properties.category) {
-        properties.category = 'All';
-      }
+    ensureSetup();
+    analytics.track.apply(this, argumentsWithEventMetaData(arguments));
+    if (typeof options === 'function') {
+      callback = options;
+      options = null;
+    }
+    if (typeof properties === 'function') {
+      callback = properties;
+      options = null;
+      properties = {};
+    }
+    if (!properties) {
+      properties = {};
+    }
+    if (!properties.category) {
+      properties.category = 'All';
+    }
 
-      Object.assign(properties, eventMetaData());
+    Object.assign(properties, eventMetaData());
 
-      dataLayer.push(
-        Object.assign(properties, {
-          event: action,
-          action: action,
-          category: properties.category,
-          label: properties.label,
-          value: properties.value
-        })
-      );
-      if (callback) {
-        callback();
-      }
-    });
+    dataLayer.push(
+      Object.assign(properties, {
+        event: action,
+        action: action,
+        category: properties.category,
+        label: properties.label,
+        value: properties.value
+      })
+    );
+    if (callback) {
+      callback();
+    }
   },
-  page: function (category, name, properties, options, callback) {
-    return ensureSetup().then(() => {
-      analytics.page.apply(this, argumentsWithEventMetaData(arguments));
-      if (typeof options === 'function') {
-        callback = options;
-        options = null;
-      }
-      if (typeof properties === 'function') {
-        callback = properties;
-        options = null;
-        properties = null;
-      }
-      if (typeof name === 'function') {
-        callback = name;
-        options = null;
-        properties = null;
-        name = null;
-      }
-      if (typeof name === 'object') {
-        options = properties;
-        properties = name;
-        name = null;
-      }
-      if (typeof category === 'string' && typeof name !== 'string') {
-        name = category;
-        category = null;
-      }
-      if (callback) {
-        callback();
-      }
-      dataLayer.push(Object.assign(properties, eventMetaData()));
-      return this;
-    });
+  page: function (category, name, properties = {}, options, callback) {
+    ensureSetup();
+    analytics.page.apply(this, argumentsWithEventMetaData(arguments));
+    if (typeof options === 'function') {
+      callback = options;
+      options = null;
+    }
+    if (typeof properties === 'function') {
+      callback = properties;
+      options = null;
+      properties = null;
+    }
+    if (typeof name === 'function') {
+      callback = name;
+      options = null;
+      properties = null;
+      name = null;
+    }
+    if (typeof name === 'object') {
+      options = properties;
+      properties = name;
+      name = null;
+    }
+    if (typeof category === 'string' && typeof name !== 'string') {
+      name = category;
+      category = null;
+    }
+    if (callback) {
+      callback();
+    }
+    dataLayer.push(Object.assign(properties, eventMetaData()));
+    return this;
   },
   identify: function (id, traits, options, callback) {
-    return ensureSetup().then(() => {
-      analytics.identify.apply(this, argumentsWithEventMetaData(arguments));
-      if (typeof options === 'function') {
-        callback = options;
-        options = null;
-      }
-      if (typeof traits === 'function') {
-        callback = traits;
-        options = null;
-        traits = null;
-      }
-      dataLayer.push(
-        Object.assign(eventMetaData(),
-        { user: { userId: id } }
-      ));
+    ensureSetup();
+    analytics.identify.apply(this, argumentsWithEventMetaData(arguments));
+    if (typeof options === 'function') {
+      callback = options;
+      options = null;
+    }
+    if (typeof traits === 'function') {
+      callback = traits;
+      options = null;
+      traits = null;
+    }
+    dataLayer.push(
+      Object.assign(eventMetaData(),
+      { user: { userId: id } }
+    ));
 
-      if (traits && typeof traits !== 'function') {
-        Object.keys(traits).forEach(trait => {
-          if (trait.startsWith('Experiment:')) {
-            dataLayer.push(
-              Object.assign(eventMetaData(),
-              { experimentName: trait, experimentVariant: traits[trait] }
-            ));
-          }
-        });
-      }
+    if (traits && typeof traits !== 'function') {
+      Object.keys(traits).forEach(trait => {
+        if (trait.startsWith('Experiment:')) {
+          dataLayer.push(
+            Object.assign(eventMetaData(),
+            { experimentName: trait, experimentVariant: traits[trait] }
+          ));
+        }
+      });
+    }
 
-      if (callback) {
-        callback();
-      }
-      return this;
-    });
+    if (callback) {
+      callback();
+    }
+    return this;
   },
   impression: function (impressions) {
-    return ensureSetup().then(() => {
-      impressions.forEach(impression => {
-        analytics.track('Viewed Impression', impression);
-      });
-      dataLayer.push(
-        Object.assign(eventMetaData(),
-        { ecommerce: { impressions: impressions } }
-      ));
+    ensureSetup();
+    impressions.forEach(impression => {
+      analytics.track('Viewed Impression', impression);
     });
+    dataLayer.push(
+      Object.assign(eventMetaData(),
+      { ecommerce: { impressions: impressions } }
+    ));
   },
   ready: function (callback) {
     if (callback) {
