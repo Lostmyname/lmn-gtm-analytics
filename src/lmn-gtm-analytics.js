@@ -74,7 +74,7 @@ const lmnAnalytics = {
       callback();
     }
   },
-  page: function (category, name, properties = {}, options, callback) {
+  page: function (category, name, properties, options, callback) {
     ensureSetup();
     analytics.page.apply(this, argumentsWithEventMetaData(arguments));
     if (typeof options === 'function') {
@@ -84,12 +84,12 @@ const lmnAnalytics = {
     if (typeof properties === 'function') {
       callback = properties;
       options = null;
-      properties = null;
+      properties = {};
     }
     if (typeof name === 'function') {
       callback = name;
       options = null;
-      properties = null;
+      properties = {};
       name = null;
     }
     if (typeof name === 'object') {
@@ -98,14 +98,22 @@ const lmnAnalytics = {
       name = null;
     }
     if (typeof category === 'string' && typeof name !== 'string') {
-      name = category;
-      category = null;
+      name = null;
     }
+    if (!properties) {
+      properties = {};
+    }
+
+    Object.assign(properties, eventMetaData());
+
+    dataLayer.push(Object.assign(properties, {
+      event: category,
+      pageName: name
+    }));
+
     if (callback) {
       callback();
     }
-    dataLayer.push(Object.assign(properties, eventMetaData()));
-    return this;
   },
   identify: function (id, traits, options, callback) {
     ensureSetup();

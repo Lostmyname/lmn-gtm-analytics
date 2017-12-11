@@ -135,6 +135,7 @@ describe('lmnAnalytics', () => {
         orientation: 'landscape'
       });
 
+      expect(global.dataLayer[0].event).to.eql('Creation Canvas');
       expect(global.dataLayer[0].locale).to.eql('en-GB');
       expect(global.dataLayer[0].orientation).to.eql('landscape');
     });
@@ -168,53 +169,36 @@ describe('lmnAnalytics', () => {
     });
 
     describe('argument shuffling', () => {
-      xit('should still pass data if the options argument is omitted', () => {
-        lmnAnalytics.page('Category', 'Homepage', {
+      it('should still pass data if the options argument is omitted', () => {
+        lmnAnalytics.page('Homepage', 'page name', {
           test: 'test'
         });
 
-        // check with carmen as page doesnt pass name, category params
-
-        expect(global.dataLayer.slice(-1)[0]).to.eql({
-          event: 'Viewed Homepage Page',
-          category: 'All',
-          label: undefined,
-          value: undefined
-        });
+        expect(global.dataLayer[0].event).to.eql('Homepage');
+        expect(global.dataLayer[0].pageName).to.eql('page name');
+        expect(global.dataLayer[0].test).to.eql('test');
       });
 
-      xit('should still pass data if options and properties are removed', () => {
+      it('should still pass data if options and properties are removed', () => {
         lmnAnalytics.page('Category-2', 'Homepage-2');
 
-        expect(global.dataLayer.slice(-1)[0]).to.eql({
-          event: 'Viewed Homepage-2 Page',
-          category: 'All',
-          label: undefined,
-          value: undefined
-        });
+        expect(global.dataLayer[0].event).to.eql('Category-2');
+        expect(global.dataLayer[0].pageName).to.eql('Homepage-2');
       });
 
-      xit('should still pass data if options, properties and name are omitted', () => {
+      it('should still pass data if options, properties and name are omitted', () => {
         lmnAnalytics.page('Homepage-3');
-        expect(global.dataLayer.slice(-1)[0]).to.own.include({
-          event: 'Viewed Homepage-3 Page',
-          category: 'All',
-          label: undefined,
-          value: undefined
-        });
+
+        expect(global.dataLayer[0].event).to.eql('Homepage-3');
       });
 
-      xit('should still pass data if category is a string and name is not a string', () => {
+      it('should still pass data if category is a string and name is not a string', () => {
         lmnAnalytics.page('Homepage-4', {
           locale: 'en-GB'
         });
 
-        expect(global.dataLayer.slice(-1)[0]).to.own.include({
-          event: 'Viewed Homepage-4 Page',
-          category: 'All',
-          label: undefined,
-          value: undefined
-        });
+        expect(global.dataLayer[0].event).to.eql('Homepage-4');
+        expect(global.dataLayer[0].locale).to.eql('en-GB');
       });
     });
 
