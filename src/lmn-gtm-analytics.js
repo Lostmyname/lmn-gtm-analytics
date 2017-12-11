@@ -151,8 +151,12 @@ const lmnAnalytics = {
   impression: function (impressions) {
     ensureSetup();
     impressions.forEach(impression => {
-      analytics.track('Viewed Impression', impression);
+      analytics.track(
+        'Viewed Impression',
+        Object.assign(impression, eventMetaData())
+      );
     });
+
     dataLayer.push(
       Object.assign(eventMetaData(),
       { ecommerce: { impressions: impressions } }
