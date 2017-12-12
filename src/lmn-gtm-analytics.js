@@ -30,19 +30,13 @@ function eventMetaData() {
   };
 }
 
-function argumentsWithEventMetaData(args, position = 1) {
-  args[position] = Object.assign(args[position] || {}, eventMetaData());
-
-  return args;
-}
-
 /**
  * Analytics wrapper for the Segment to GTM integration
  */
 const lmnAnalytics = {
   track: function (action, properties, options, callback) {
     ensureSetup();
-    analytics.track.apply(this, argumentsWithEventMetaData(arguments));
+
     if (typeof options === 'function') {
       callback = options;
       options = null;
@@ -60,6 +54,9 @@ const lmnAnalytics = {
     }
 
     Object.assign(properties, eventMetaData());
+    // reconstruct arguments after sanitisation to proxy through
+    const args = [action, properties, options, callback].filter(x => x);
+    analytics.track.apply(this, args);
 
     dataLayer.push(
       Object.assign(properties, {
@@ -76,7 +73,7 @@ const lmnAnalytics = {
   },
   page: function (category, name, properties, options, callback) {
     ensureSetup();
-    analytics.page.apply(this, argumentsWithEventMetaData(arguments, 2));
+
     if (typeof options === 'function') {
       callback = options;
       options = null;
@@ -105,6 +102,9 @@ const lmnAnalytics = {
     }
 
     Object.assign(properties, eventMetaData());
+    // reconstruct arguments after sanitisation to proxy through
+    const args = [category, name, properties, options, callback].filter(x => x);
+    analytics.page.apply(this, args);
 
     dataLayer.push(Object.assign(properties, {
       event: category,
@@ -117,7 +117,7 @@ const lmnAnalytics = {
   },
   identify: function (id, traits, options, callback) {
     ensureSetup();
-    analytics.identify.apply(this, argumentsWithEventMetaData(arguments));
+
     if (typeof options === 'function') {
       callback = options;
       options = null;
@@ -127,10 +127,18 @@ const lmnAnalytics = {
       options = null;
       traits = null;
     }
+
+    traits = Object.assign(traits || {}, eventMetaData());
+    // reconstruct arguments after sanitisation to proxy through
+    const args = [id, traits, options, callback].filter(x => x);
+    analytics.identify.apply(this, args);
+
     dataLayer.push(
-      Object.assign(eventMetaData(),
-      { user: { userId: id } }
-    ));
+      Object.assign(
+        traits,
+        { user: { userId: id } }
+      )
+    );
 
     if (traits && typeof traits !== 'function') {
       Object.keys(traits).forEach(trait => {
