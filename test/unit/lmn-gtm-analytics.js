@@ -41,7 +41,8 @@ describe('lmnAnalytics', () => {
 
       expect(global.analytics.track).to.have.been.calledWithMatch('Custom Event', {
         category: 'test',
-        label: 'test'
+        label: 'test',
+        gaCookieId: 'not-set'
       });
     });
 
@@ -155,7 +156,24 @@ describe('lmnAnalytics', () => {
       });
 
       expect(global.analytics.page).to.have.been.calledWithMatch('Creation Canvas', {
-        locale: 'en-GB'
+        locale: 'en-GB',
+        gaCookieId: 'not-set'
+      });
+    });
+
+    it('should include event meta when name sent (regression)', () => {
+      lmnAnalytics.page('Creation Canvas 1', 'Canvas');
+
+      expect(global.analytics.page).to.have.been.calledWithMatch('Creation Canvas 1', 'Canvas', {
+        gaCookieId: 'not-set'
+      });
+    });
+
+    it('should include event meta when only category sent (regression)', () => {
+      lmnAnalytics.page('Creation Canvas Test 2');
+
+      expect(global.analytics.page).to.have.been.calledWithMatch('Creation Canvas Test 2', {
+        gaCookieId: 'not-set'
       });
     });
 
@@ -239,6 +257,7 @@ describe('lmnAnalytics', () => {
 
       expect(global.analytics.identify).to.have.been.calledWithMatch('12345', {
         email: 'test@example.com',
+        gaCookieId: 'not-set'
       });
     });
 
