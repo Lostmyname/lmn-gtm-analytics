@@ -6,9 +6,9 @@ import uuid from 'uuid';
 function ensureSetup() {
   window.dataLayer = window.dataLayer || [];
   window.analytics = window.analytics || { 
-    track: function() {}, 
-    page: function() {}, 
-    identify: function() {} 
+    track: function () {}, 
+    page: function () {}, 
+    identify: function () {} 
   };
 }
 
